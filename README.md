@@ -28,12 +28,34 @@ A powerful PyQt6-based pathfinding application with interactive map visualizatio
 
 ### 🚦 Dynamic Effects & Obstacles
 
-#### 1. Road Blocks 🚧
+#### 1. Traffic Jams 🚗
+- Draw traffic zones by clicking and dragging on the map
+- Three intensity levels:
+  - **Light**: +50 weight penalty
+  - **Moderate**: +100 weight penalty
+  - **Heavy**: +200 weight penalty
+- Affects all edges within 20px of the drawn line
+- Visual: Red solid line (2px width)
+
+#### 2. Road Blocks 🚧
 - Draw blocked road segments
 - Sets affected edges to infinite weight (impassable)
 - Affects edges within 20px threshold
 - Visual: Black solid line (3px width)
 - Forces complete route recalculation
+
+#### 3. Traffic Lights 🚦
+- Place functional traffic lights with countdown timers
+- Configurable durations:
+  - **Red**: 1-300 seconds (default: 30s)
+  - **Yellow**: 1-60 seconds (default: 5s)
+  - **Green**: 1-300 seconds (default: 25s)
+- **Dynamic Weight Calculation**:
+  - Red: 3.33 penalty units/second remaining
+  - Yellow: 10.0 penalty units/second remaining
+  - Green: 0.04 penalty units/second remaining
+- Real-time state changes with countdown display
+- Visual: Icon (32x32px) with orange effect line
 
 ### 📍 Waypoint Management
 - Add unlimited waypoints via map clicks
@@ -70,7 +92,7 @@ SQLite3 (included with Python)
 
 1. **Clone the repository**
 ```bash
-git clone [https://github.com/toantd181/PathFinding_IT3150_HUST](https://github.com/toantd181/PathFinding_IT3150_HUST)
+git clone https://github.com/toantd181/Path-Finding---Project-1---HUST
 cd pathfinding-app
 ```
 
@@ -273,17 +295,44 @@ conn.close()
 
 ### Adding Effects
 
+#### Traffic Jam
+1. Click "Draw Traffic Zone" button
+2. Select intensity from dropdown:
+   - Light (+50)
+   - Moderate (+100)
+   - Heavy (+200)
+3. Click and drag on map to draw affected area
+4. Release mouse to apply effect
+
 #### Road Block
 1. Click "Draw Block" button
 2. Click and drag to draw blocked segment
 3. Release to apply blockage
 4. Path automatically avoids blocked areas
 
+#### Traffic Light
+1. Click "Place Traffic Light" button
+2. Click to place icon
+3. Drag to define effect area (orange line)
+4. Release to place
+5. Configure durations before placing:
+   - Red: 1-300 seconds
+   - Yellow: 1-60 seconds
+   - Green: 1-300 seconds
+
+**Traffic Light Behavior:**
+- Cycles: Red → Green → Yellow → Red
+- Countdown timer shows remaining seconds
+- Text color matches current state
+- Weight penalty decreases as time passes
+
 ### Removing Effects
 
 - **Single Effect**: Hold Shift + Click on effect
 - **By Type**:
+  - "Clear All Traffic" button
   - "Clear All Blocks" button
+  - "Clear All Lights" button
 - **All Effects**: "🗑️ Clear ALL Effects" button (purple)
 
 ## ⚙️ Configuration & Tuning
@@ -466,10 +515,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 📧 Contact
 
-
+Toàn TD
 Email: toan.tranduc1801@gmail.com
 
-Project Link: [https://github.com/toantd181/PathFinding_IT3150_HUST](https://github.com/toantd181/PathFinding_IT3150_HUST)
+Project Link: [https://github.com/toantd181/Path-Finding---Project-1---HUST](https://github.com/toantd181/Path-Finding---Project-1---HUST)
 
 ## 📚 Additional Resources
 
