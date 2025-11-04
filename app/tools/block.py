@@ -1,4 +1,4 @@
-# filepath: /home/khoi/Code/Python/pathFinding/app/tools/block_way.py
+
 class BlockWayTool:
     """Manages the state for the block way tool."""
     def __init__(self):
