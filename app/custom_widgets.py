@@ -1,4 +1,3 @@
-# filepath: /home/khoi/Code/Python/pathFinding/app/custom_widgets.py
 import os
 from PyQt6.QtWidgets import QPushButton
 

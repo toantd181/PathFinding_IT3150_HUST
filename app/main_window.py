@@ -121,6 +121,8 @@ class MainWindow(QMainWindow):
         self.sidebar.clear_waypoints_button.clicked.connect(self._clear_all_waypoints)
         self.sidebar.remove_waypoint_button.clicked.connect(self._remove_selected_waypoint)
 
+        self._suppress_path_errors = False
+
     def _on_start_mode_toggled(self, checked):
         """Handle start selection mode toggle"""
         self.map_viewer.set_start_selection_mode(checked)
@@ -262,12 +264,19 @@ class MainWindow(QMainWindow):
             else:
                 print(f"Skipping removal of {removed_waypoint['node_id']} - it's a start/end point")
         
+        # ⭐ SUPPRESS ERRORS DURING PATH RECALCULATION ⭐
+        self._suppress_path_errors = True
+        
         # Recalculate path
-        if self.start_node and self.end_node:
-            if self.sidebar.waypoints:
-                self._trigger_pathfinding_with_waypoints()
-            else:
-                self._trigger_pathfinding()
+        try:
+            if self.start_node and self.end_node:
+                if self.sidebar.waypoints:
+                    self._trigger_pathfinding_with_waypoints()
+                else:
+                    self._trigger_pathfinding()
+        finally:
+            # Always re-enable errors after recalculation
+            self._suppress_path_errors = False
         
         print(f"Removed waypoint: {removed_waypoint['node_id']}")
 
@@ -1065,8 +1074,9 @@ class MainWindow(QMainWindow):
                     segment_path = self.pathfinder.find_path(segment_start, segment_end)
                     
                     if not segment_path:
-                        QMessageBox.warning(self, "No Path", 
-                            f"No path found between stop {i} and stop {i+1}")
+                        if not self._suppress_path_errors:
+                            QMessageBox.warning(self, "No Path", 
+                                f"No path found between stop {i} and stop {i+1}")
                         self.map_viewer.clear_path()
                         return
                     
@@ -1101,9 +1111,8 @@ class MainWindow(QMainWindow):
             
         except Exception as e:
             print(f"Error during multi-stop pathfinding: {e}")
-            import traceback
-            traceback.print_exc()
-            QMessageBox.critical(self, "Pathfinding Error", f"An error occurred: {e}")
+            if not self._suppress_path_errors:
+                QMessageBox.critical(self, "Pathfinding Error", f"An error occurred: {e}")
             self.map_viewer.clear_path()
 
     def _optimize_route_order(self, route_points):
@@ -1267,7 +1276,8 @@ class MainWindow(QMainWindow):
             return
 
         if not self.pathfinder:
-            QMessageBox.critical(self, "Error", "Pathfinding engine not available.")
+            if not self._suppress_path_errors:
+                QMessageBox.critical(self, "Error", "Pathfinding engine not available.")
             return
 
         print(f"Finding path from {self.start_node} to {self.end_node}...")
@@ -1297,21 +1307,24 @@ class MainWindow(QMainWindow):
                 # Don't draw path if it contains blocked edges
                 if path_has_infinite_weight or cost == float('inf'):
                     print(f"Path contains blocked edges (cost: {cost}). Not displaying.")
-                    QMessageBox.warning(self, "No Valid Path", 
-                        f"The path between {self.start_node} and {self.end_node} is blocked.\n\n"
-                        f"All available routes contain blocked roads.")
+                    if not self._suppress_path_errors:
+                        QMessageBox.warning(self, "No Valid Path", 
+                            f"The path between {self.start_node} and {self.end_node} is blocked.\n\n"
+                            f"All available routes contain blocked roads.")
                     self.map_viewer.clear_path()
                 else:
                     print(f"Path found: {len(path_nodes)} nodes, cost: {cost:.2f}")
                     self.map_viewer.draw_path(path_nodes, self.node_positions)
             else:
                 print("No path found.")
-                QMessageBox.information(self, "Pathfinding", 
-                    f"No path found between {self.start_node} and {self.end_node}.")
+                if not self._suppress_path_errors:
+                    QMessageBox.information(self, "Pathfinding", 
+                        f"No path found between {self.start_node} and {self.end_node}.")
                 self.map_viewer.clear_path()
         except Exception as e:
             print(f"Error during pathfinding: {e}")
-            QMessageBox.critical(self, "Pathfinding Error", f"An error occurred: {e}")
+            if not self._suppress_path_errors:
+                QMessageBox.critical(self, "Pathfinding Error", f"An error occurred: {e}")
             self.map_viewer.clear_path()
 
     def closeEvent(self, event):
